@@ -135,18 +135,14 @@ contract Multisig is EIP712 {
                 revert NotSigner(recoveredSigner);
             }
 
-            bool alreadySigned = false;
             for (uint256 j = 0; j < validSignatureCount; j++) {
                 if (signersWhoSigned[j] == recoveredSigner) {
-                    alreadySigned = true;
-                    break;
+                    revert AlreadySigner(recoveredSigner);
                 }
             }
 
-            if (!alreadySigned) {
-                signersWhoSigned[validSignatureCount] = recoveredSigner;
-                validSignatureCount++;
-            }
+            signersWhoSigned[validSignatureCount] = recoveredSigner;
+            validSignatureCount++;
 
             if (validSignatureCount >= _requiredSigs) {
                 return;

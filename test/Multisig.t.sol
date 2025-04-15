@@ -298,7 +298,7 @@ contract MultisigTest is Test {
         assertEq(multisig.nonce(), nonce);
     }
 
-    function test_Execute_Revert_InsufficientUniqueSignatures() public {
+    function test_Execute_Revert_DuplicatedSignature() public {
         bytes memory data = abi.encodeWithSelector(TargetContract.callMe.selector);
         uint256 nonce = multisig.nonce();
 
@@ -307,7 +307,7 @@ contract MultisigTest is Test {
         signatures[0] = sig1;
         signatures[1] = sig1;
 
-        vm.expectRevert(abi.encodeWithSelector(Multisig.ThresholdNotMet.selector, THRESHOLD, 1));
+        vm.expectRevert(abi.encodeWithSelector(Multisig.AlreadySigner.selector, signer1Addr));
         multisig.execute(address(target), 0, data, signatures);
 
         assertEq(multisig.nonce(), nonce);

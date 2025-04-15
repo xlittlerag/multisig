@@ -72,7 +72,7 @@ contract Multisig is EIP712 {
         uint256 currentNonce = nonce;
         bytes32 txHash = _hashTransaction(_target, _value, _data, currentNonce);
 
-        _verifySignatures(txHash, _signatures, requiredSigs);
+        _verifySignatures(txHash, _signatures);
 
         nonce++;
 
@@ -119,9 +119,8 @@ contract Multisig is EIP712 {
 
     // --- Signature Verification ---
 
-    function _verifySignatures(bytes32 _txHash, bytes[] calldata _signatures, uint256 _requiredSigs) internal view {
-        uint256 validSignatureCount = 0;
-        address[] memory signersWhoSigned = new address[](_requiredSigs);
+    function _verifySignatures(bytes32 _txHash, bytes[] calldata _signatures) internal view {
+        address[] memory signersWhoSigned = new address[](_signatures.length);
 
         for (uint256 i = 0; i < _signatures.length; i++) {
             bytes calldata sig = _signatures[i];
@@ -135,22 +134,13 @@ contract Multisig is EIP712 {
                 revert NotSigner(recoveredSigner);
             }
 
-            for (uint256 j = 0; j < validSignatureCount; j++) {
+            for (uint256 j = 0; j < i; j++) {
                 if (signersWhoSigned[j] == recoveredSigner) {
                     revert AlreadySigner(recoveredSigner);
                 }
             }
 
-            signersWhoSigned[validSignatureCount] = recoveredSigner;
-            validSignatureCount++;
-
-            if (validSignatureCount >= _requiredSigs) {
-                return;
-            }
-        }
-
-        if (validSignatureCount < _requiredSigs) {
-            revert ThresholdNotMet(_requiredSigs, validSignatureCount);
+            signersWhoSigned[i] = recoveredSigner;
         }
     }
 

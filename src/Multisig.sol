@@ -20,7 +20,6 @@ contract Multisig is EIP712 {
     error AlreadySigner(address signer);
     error NotSigner(address signer);
     error ThresholdNotMet(uint256 required, uint256 provided);
-    error InvalidSignature(address recovered);
     error InvalidSignaturesArray();
     error InvalidSignatureLength(uint256 index);
     error DuplicateSignerInNewSet();
@@ -153,9 +152,6 @@ contract Multisig is EIP712 {
 
             address recoveredSigner = ECDSA.recover(_txHash, sig);
 
-            if (recoveredSigner == address(0)) {
-                revert InvalidSignature(recoveredSigner);
-            }
             if (!isSigner[recoveredSigner]) {
                 revert NotSigner(recoveredSigner);
             }

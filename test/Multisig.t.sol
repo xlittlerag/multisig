@@ -167,7 +167,7 @@ contract MultisigTest is Test {
 
     function test_Deploy_Revert_EmptySigners() public {
         address[] memory emptySigners = new address[](0);
-        vm.expectRevert(abi.encodeWithSelector(Multisig.InvalidThreshold.selector, 1, 0));
+        vm.expectRevert(Multisig.EmptySigners.selector);
         new Multisig(emptySigners, 1);
     }
 
@@ -179,11 +179,11 @@ contract MultisigTest is Test {
         new Multisig(signersWithZero, 2);
     }
 
-    function test_Deploy_Revert_DuplicateInitialSigners() public {
+    function test_Deploy_Revert_DuplicateSigner() public {
         address[] memory duplicateSigners = new address[](2);
         duplicateSigners[0] = signer1Addr;
         duplicateSigners[1] = signer1Addr;
-        vm.expectRevert(Multisig.DuplicateSignerInInitialSet.selector);
+        vm.expectRevert(Multisig.DuplicateSigner.selector);
         new Multisig(duplicateSigners, 2);
     }
 
@@ -571,7 +571,7 @@ contract MultisigTest is Test {
         pks[1] = signer2Pk;
         bytes[] memory signatures = _assembleSignatures(address(multisig), 0, updateData, nonce, pks);
 
-        vm.expectRevert(Multisig.DuplicateSignerInNewSet.selector);
+        vm.expectRevert(Multisig.DuplicateSigner.selector);
 
         multisig.execute(address(multisig), 0, updateData, signatures);
 

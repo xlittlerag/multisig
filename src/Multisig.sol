@@ -22,8 +22,7 @@ contract Multisig is EIP712 {
     error ThresholdNotMet(uint256 required, uint256 provided);
     error InvalidSignaturesArray();
     error InvalidSignatureLength(uint256 index);
-    error DuplicateSignerInNewSet();
-    error DuplicateSignerInInitialSet();
+    error DuplicateSigner();
     error InvalidSelfCallTarget();
     error ZeroAddressSigner();
     error EmptySigners();
@@ -54,28 +53,8 @@ contract Multisig is EIP712 {
     // --- Constructor ---
 
     constructor(address[] memory _initialSigners, uint256 _initialThreshold) EIP712("Multisig", "1") {
-        uint256 numSigners = _initialSigners.length;
-        if (_initialThreshold == 0 || _initialThreshold > numSigners) {
-            revert InvalidThreshold(_initialThreshold, numSigners);
-        }
-        if (numSigners == 0) {
-            revert EmptySigners();
-        }
-
-        for (uint256 i = 0; i < numSigners; i++) {
-            address signer = _initialSigners[i];
-            if (signer == address(0)) {
-                revert ZeroAddressSigner();
-            }
-            for (uint256 j = 0; j < i; j++) {
-                if (_initialSigners[j] == signer) {
-                    revert DuplicateSignerInInitialSet();
-                }
-            }
-            isSigner[signer] = true;
-        }
-        signers = _initialSigners;
-        threshold = _initialThreshold;
+        updateSigners(_initialSigners);
+        updateThreshold(_initialThreshold);
     }
 
     // --- Core Execution Logic ---
@@ -211,7 +190,7 @@ contract Multisig is EIP712 {
             }
             for (uint256 j = 0; j < i; j++) {
                 if (_newSigners[j] == signer) {
-                    revert DuplicateSignerInNewSet();
+                    revert DuplicateSigner();
                 }
             }
             isSigner[signer] = true;

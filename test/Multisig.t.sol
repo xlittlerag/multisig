@@ -175,9 +175,7 @@ contract MultisigTest is Test {
         address[] memory signersWithZero = new address[](2);
         signersWithZero[0] = signer1Addr;
         signersWithZero[1] = address(0);
-        vm.expectRevert(
-            abi.encodeWithSelector(Multisig.InvalidSignersSet.selector, "Cannot add zero address as signer")
-        );
+        vm.expectRevert(Multisig.ZeroAddressSigner.selector);
         new Multisig(signersWithZero, 2);
     }
 
@@ -531,9 +529,7 @@ contract MultisigTest is Test {
         pks[1] = signer2Pk;
         bytes[] memory signatures = _assembleSignatures(address(multisig), 0, updateData, nonce, pks);
 
-        vm.expectRevert(
-            abi.encodeWithSelector(Multisig.InvalidSignersSet.selector, "New signers array cannot be empty")
-        );
+        vm.expectRevert(Multisig.EmptySigners.selector);
 
         multisig.execute(address(multisig), 0, updateData, signatures);
 
@@ -554,9 +550,7 @@ contract MultisigTest is Test {
         pks[1] = signer2Pk;
         bytes[] memory signatures = _assembleSignatures(address(multisig), 0, updateData, nonce, pks);
 
-        vm.expectRevert(
-            abi.encodeWithSelector(Multisig.InvalidSignersSet.selector, "Cannot add zero address as signer")
-        );
+        vm.expectRevert(Multisig.ZeroAddressSigner.selector);
 
         multisig.execute(address(multisig), 0, updateData, signatures);
 
